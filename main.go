@@ -10,6 +10,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type App struct {
+	Name    string `json:"app_name"`
+	Version string `json:"version"`
+}
+
 type Member struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
@@ -21,7 +26,7 @@ type Members []Member
 
 func main() {
 	r := httprouter.New()
-	r.GET("/api/", Home)
+	r.GET("/api/v1", Home)
 
 	// Members
 	r.GET("/api/v1/members", MembersIndex)
@@ -38,7 +43,16 @@ func main() {
 }
 
 func Home(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "My Band ... My band!!!")
+	app := App{"My Band", "1.0"}
+	js, err := json.Marshal(app)
+
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write(js)
 }
 
 func MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -51,7 +65,6 @@ func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params)
 
 func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	member := Member{1, "Edmore", "Moyo", "vocalist"}
-
 	js, err := json.Marshal(member)
 
 	if err != nil {
@@ -61,7 +74,6 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(js)
-
 }
 
 func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
