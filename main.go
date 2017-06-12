@@ -5,10 +5,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+
+	"database/sql"
+	_ "github.com/lib/pq"
 
 	"github.com/julienschmidt/httprouter"
 )
+
+// const (
+// 	host     = "localhost"
+// 	port     = 5432
+// 	user     = "edmoremoyo"
+// 	password = ""
+// 	dbname   = "band"
+// )
 
 type App struct {
 	Name    string `json:"app_name"`
@@ -64,7 +76,34 @@ func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
 
 func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	member := Member{1, "Edmore", "Moyo", "vocalist"}
+	db, err := sql.Open("postgres", "user=edmoremoyo dbname=band sslmode=disable")
+	if err != nil {
+		log.Fatal("Error: The data source arguments are not valid")
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected to DB!")
+
+	var name string
+	var surname string
+	var speciality string
+	var id int
+
+	err = db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
+	if err == sql.ErrNoRows {
+		log.Fatal("No Results Found")
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	member := Member{id, name, surname, speciality}
 	js, err := json.Marshal(member)
 
 	if err != nil {
