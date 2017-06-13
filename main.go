@@ -129,7 +129,7 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Process
 	err := db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
 	if err == sql.ErrNoRows {
-		http.Error(rw, err.Error(), http.StatusNotFound)
+		http.Error(rw, "Member not found", http.StatusNotFound)
 		return
 	}
 	if err != nil {
@@ -155,10 +155,11 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		panic(err)
 	}
 	defer r.Body.Close()
+	var result sql.Result
 
 	// Some refactoring required here ...
 	if member.Name != "" {
-		_, err = db.Exec("UPDATE members SET name=$1 where id=$2",
+		result, err = db.Exec("UPDATE members SET name=$1 where id=$2",
 			member.Name, p.ByName("id"))
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -167,7 +168,7 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	}
 
 	if member.Surname != "" {
-		_, err = db.Exec("UPDATE members SET surname=$1 where id=$2",
+		result, err = db.Exec("UPDATE members SET surname=$1 where id=$2",
 			member.Surname, p.ByName("id"))
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -176,19 +177,29 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	}
 
 	if member.Speciality != "" {
-		_, err = db.Exec("UPDATE members SET speciality=$1 where id=$2",
+		result, err = db.Exec("UPDATE members SET speciality=$1 where id=$2",
 			member.Speciality, p.ByName("id"))
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(rw, "Member not found", http.StatusNotFound)
+		return
+	}
 }
 
 func MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	_, err := db.Exec("DELETE FROM members where id=$1", p.ByName("id"))
+	result, err := db.Exec("DELETE FROM members where id=$1", p.ByName("id"))
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, err := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(rw, "Member not found", http.StatusNotFound)
 		return
 	}
 }
