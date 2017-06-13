@@ -79,8 +79,37 @@ func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rw.Write(js)
 }
 
+// Member Controllers
 func MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "Members index")
+	rows, err := db.Query("SELECT * FROM members")
+	if err == sql.ErrNoRows {
+		http.Error(rw, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	// Response
+	members := make([]*Member, 0)
+	for rows.Next() {
+		member := new(Member)
+		err := rows.Scan(&member.Id, &member.Name, &member.Surname, &member.Speciality)
+		if err != nil {
+			log.Fatal(err)
+		}
+		members = append(members, member)
+	}
+
+	js, err := json.Marshal(members)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write(js)
 }
 
 func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -94,7 +123,6 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
-	defer db.Close()
 
 	if err != nil {
 		log.Fatal(err)
