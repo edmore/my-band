@@ -26,8 +26,6 @@ type Member struct {
 	Speciality string `json:"speciality"`
 }
 
-type Members []Member
-
 var db *sql.DB
 
 // Member variables
@@ -113,7 +111,19 @@ func MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 }
 
 func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "Member create")
+	decoder := json.NewDecoder(r.Body)
+	member := Member{}
+	err := decoder.Decode(&member)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	_, err = db.Exec("INSERT INTO members(name, surname, speciality) VALUES($1, $2, $3)",
+		member.Name, member.Surname, member.Speciality)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
