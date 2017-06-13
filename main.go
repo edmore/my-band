@@ -36,9 +36,14 @@ type Member struct {
 
 type Members []Member
 
+var name string
+var surname string
+var speciality string
+var id int
+
 func main() {
 	r := httprouter.New()
-	r.GET("/api/v1", Home)
+	r.GET("/api/v1", Root)
 
 	// Members
 	r.GET("/api/v1/members", MembersIndex)
@@ -54,7 +59,7 @@ func main() {
 	http.ListenAndServe(":8080", r)
 }
 
-func Home(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	app := App{"My Band", "1.0"}
 	js, err := json.Marshal(app)
 
@@ -87,16 +92,10 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected to DB!")
-
-	var name string
-	var surname string
-	var speciality string
-	var id int
-
 	err = db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
 	if err == sql.ErrNoRows {
-		log.Fatal("No Results Found")
+		http.Error(rw, err.Error(), http.StatusNotFound)
+		return
 	}
 
 	if err != nil {
