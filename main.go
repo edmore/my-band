@@ -29,6 +29,8 @@ type Member struct {
 type Members []Member
 
 var db *sql.DB
+
+// Member variables
 var name string
 var surname string
 var speciality string
@@ -46,7 +48,6 @@ func main() {
 	r.GET("/api/v1/member/:id", MemberShow)
 	r.PUT("/api/v1/member/:id", MemberUpdate)
 	r.DELETE("/api/v1/member/:id", MemberDelete)
-	r.GET("/api/v1/member/:id/edit", MemberEdit)
 
 	fmt.Println("Starting server on :8080")
 	http.ListenAndServe(":8080", r)
@@ -74,7 +75,6 @@ func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(js)
 }
@@ -117,8 +117,4 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 
 func MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	fmt.Fprintln(rw, "Member delete")
-}
-
-func MemberEdit(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "Member edit")
 }
