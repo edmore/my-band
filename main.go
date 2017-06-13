@@ -121,7 +121,8 @@ func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params)
 	_, err = db.Exec("INSERT INTO members(name, surname, speciality) VALUES($1, $2, $3)",
 		member.Name, member.Surname, member.Speciality)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -161,7 +162,8 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		_, err = db.Exec("UPDATE members SET name=$1 where id=$2",
 			member.Name, p.ByName("id"))
 		if err != nil {
-			log.Fatal(err)
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -169,7 +171,8 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		_, err = db.Exec("UPDATE members SET surname=$1 where id=$2",
 			member.Surname, p.ByName("id"))
 		if err != nil {
-			log.Fatal(err)
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -184,5 +187,9 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 }
 
 func MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "Member delete")
+	_, err := db.Exec("DELETE FROM members where id=$1", p.ByName("id"))
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
