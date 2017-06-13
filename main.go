@@ -58,7 +58,6 @@ func init() {
 	if err != nil {
 		log.Fatal("Error: The data source arguments are not valid")
 	}
-
 	err = db.Ping()
 	if err != nil {
 		panic(err)
@@ -133,7 +132,6 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,7 +148,39 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintln(rw, "Member update")
+	decoder := json.NewDecoder(r.Body)
+	member := Member{}
+	err := decoder.Decode(&member)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	// Some refactoring required here ...
+	if member.Name != "" {
+		_, err = db.Exec("UPDATE members SET name=$1 where id=$2",
+			member.Name, p.ByName("id"))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if member.Surname != "" {
+		_, err = db.Exec("UPDATE members SET surname=$1 where id=$2",
+			member.Surname, p.ByName("id"))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if member.Speciality != "" {
+		_, err = db.Exec("UPDATE members SET speciality=$1 where id=$2",
+			member.Speciality, p.ByName("id"))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
