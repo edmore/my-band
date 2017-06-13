@@ -53,7 +53,6 @@ func main() {
 
 func init() {
 	var err error
-
 	db, err = sql.Open("postgres", "user=edmoremoyo dbname=band sslmode=disable")
 	if err != nil {
 		log.Fatal("Error: The data source arguments are not valid")
