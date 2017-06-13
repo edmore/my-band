@@ -36,6 +36,7 @@ type Member struct {
 
 type Members []Member
 
+var db *sql.DB
 var name string
 var surname string
 var speciality string
@@ -57,6 +58,20 @@ func main() {
 
 	fmt.Println("Starting server on :8080")
 	http.ListenAndServe(":8080", r)
+}
+
+func init() {
+	var err error
+
+	db, err = sql.Open("postgres", "user=edmoremoyo dbname=band sslmode=disable")
+	if err != nil {
+		log.Fatal("Error: The data source arguments are not valid")
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -81,35 +96,25 @@ func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
 
 func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	db, err := sql.Open("postgres", "user=edmoremoyo dbname=band sslmode=disable")
-	if err != nil {
-		log.Fatal("Error: The data source arguments are not valid")
-	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
+	// Process
+	err := db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
 	if err == sql.ErrNoRows {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
+	defer db.Close()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Response
 	member := Member{id, name, surname, speciality}
 	js, err := json.Marshal(member)
-
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(js)
 }
