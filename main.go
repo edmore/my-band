@@ -14,14 +14,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// const (
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = "edmoremoyo"
-// 	password = ""
-// 	dbname   = "band"
-// )
-
 type App struct {
 	Name    string `json:"app_name"`
 	Version string `json:"version"`
