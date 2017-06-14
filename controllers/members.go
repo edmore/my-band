@@ -32,8 +32,17 @@ func init() {
 	}
 }
 
+
+type MemberController struct{}
+
+
+func NewMemberController() *MemberController{
+	return &MemberController{}
+}
+
+
 // Member Controllers
-func MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (mc *MemberController) MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rows, err := db.Query("SELECT * FROM members")
 	if err == sql.ErrNoRows {
 		http.Error(rw, err.Error(), http.StatusNotFound)
@@ -65,7 +74,7 @@ func MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	rw.Write(js)
 }
 
-func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (mc *MemberController) MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	decoder := json.NewDecoder(r.Body)
 	member := models.Member{}
 	err := decoder.Decode(&member)
@@ -82,7 +91,7 @@ func MembersCreate(rw http.ResponseWriter, r *http.Request, p httprouter.Params)
 	}
 }
 
-func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (mc *MemberController) MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Process
 	err := db.QueryRow("SELECT * FROM members WHERE id=$1", p.ByName("id")).Scan(&id, &name, &surname, &speciality)
 	if err == sql.ErrNoRows {
@@ -104,7 +113,7 @@ func MemberShow(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rw.Write(js)
 }
 
-func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (mc *MemberController) MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	decoder := json.NewDecoder(r.Body)
 	member := models.Member{}
 	err := decoder.Decode(&member)
@@ -148,7 +157,7 @@ func MemberUpdate(rw http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	}
 }
 
-func MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (mc *MemberController) MemberDelete(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	result, err := db.Exec("DELETE FROM members where id=$1", p.ByName("id"))
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)

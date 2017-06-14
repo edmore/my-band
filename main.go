@@ -18,15 +18,16 @@ type App struct {
 func main() {
 	r := httprouter.New()
 	r.GET("/api/v1", Root)
+	mc := controllers.NewMemberController()
 
 	// Members
-	r.GET("/api/v1/members", controllers.MembersIndex)
-	r.POST("/api/v1/members", controllers.MembersCreate)
+	r.GET("/api/v1/members", mc.MembersIndex)
+	r.POST("/api/v1/members", mc.MembersCreate)
 
 	// Member singular
-	r.GET("/api/v1/member/:id", controllers.MemberShow)
-	r.PUT("/api/v1/member/:id", controllers.MemberUpdate)
-	r.DELETE("/api/v1/member/:id", controllers.MemberDelete)
+	r.GET("/api/v1/member/:id", mc.MemberShow)
+	r.PUT("/api/v1/member/:id", mc.MemberUpdate)
+	r.DELETE("/api/v1/member/:id", mc.MemberDelete)
 
 	fmt.Println("Starting server on :8080")
 	http.ListenAndServe(":8080", r)
