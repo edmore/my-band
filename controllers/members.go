@@ -32,14 +32,11 @@ func init() {
 	}
 }
 
-
 type MemberController struct{}
 
-
-func NewMemberController() *MemberController{
+func NewMemberController() *MemberController {
 	return &MemberController{}
 }
-
 
 // Member Controllers
 func (mc *MemberController) MembersIndex(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
