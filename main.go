@@ -4,10 +4,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/edmore/my-band/controllers"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
-    "fmt"
 )
 
 type App struct {

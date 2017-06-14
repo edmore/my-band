@@ -8,8 +8,8 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 
-		"github.com/julienschmidt/httprouter"
-		"github.com/edmore/my-band/models"
+	"github.com/edmore/my-band/models"
+	"github.com/julienschmidt/httprouter"
 )
 
 var db *sql.DB
