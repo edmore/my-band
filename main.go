@@ -30,7 +30,7 @@ func main() {
 	r.DELETE("/api/v1/member/:id", mc.MemberDelete)
 
 	fmt.Println("Starting server on :8080")
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", &Server{r})
 }
 
 func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -43,4 +43,13 @@ func Root(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(js)
+}
+
+type Server struct {
+  r *httprouter.Router
+}
+
+func (s *Server) ServeHTTP (w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  s.r.ServeHTTP(w, r)
 }
